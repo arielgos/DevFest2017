@@ -58,7 +58,7 @@ public class Splash extends Activity {
 
     @Override
     public void onBackPressed() {
-        // evadimos el backkey para que no salga de la aplicacion
+        // evadimos el back para que no salga de la aplicacion
     }
 
     private boolean checkPlayServices() {
