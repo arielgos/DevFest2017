@@ -1,0 +1,55 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/footer"
+        android:background="@android:color/transparent"
+        android:divider="@color/colorWhite"
+        android:dividerHeight="0dp"
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll">
+    </ListView>
+
+    <TableRow
+        android:id="@+id/footer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:background="@color/colorPrimaryLight"
+        android:weightSum="1"
+        android:paddingTop="1dp">
+
+        <EditText
+            android:id="@+id/message"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:background="@color/colorWhite"
+            android:drawableLeft="@android:drawable/ic_menu_send"
+            android:drawableTintMode="screen"
+            android:imeActionLabel="@android:string/search_go"
+            android:inputType="text"
+            android:maxLines="3"
+            android:padding="10dp"
+            android:textColor="@color/colorPrimaryDark"/>
+
+        <Button
+            android:id="@+id/send"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="right|center_vertical"
+            android:layout_weight="0.2"
+            android:background="@drawable/btn_red"
+            android:padding="10dp"
+            android:text="@string/send"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
+            android:textColor="@color/colorWhite"/>
+
+    </TableRow>
+
+</RelativeLayout>
