@@ -62,6 +62,7 @@ public class Chat extends AppCompatActivity {
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         destiny = (User) getIntent().getExtras().getSerializable("user");
+
         getSupportActionBar().setTitle(destiny.getName());
 
         //Firestore
@@ -72,12 +73,14 @@ public class Chat extends AppCompatActivity {
             referenceSource = fireStore.collection("chats");
         }
 
-        referenceSource.orderBy("date", Query.Direction.DESCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
+        referenceSource.orderBy("time", Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(QuerySnapshot snapshots, FirebaseFirestoreException e) {
                 if (snapshots != null) {
                     for (DocumentChange document : snapshots.getDocumentChanges()) {
-                        messages.add(document.getDocument().toObject(Message.class));
+                        if (document.getType().equals(DocumentChange.Type.ADDED)) {
+                            messages.add(document.getDocument().toObject(Message.class));
+                        }
                     }
                     ((MessageAdapter) list.getAdapter()).notifyDataSetChanged();
                 }
@@ -95,6 +98,7 @@ public class Chat extends AppCompatActivity {
             public void onClick(View v) {
                 if (txtMessage.getText().toString() != "" && txtMessage.getText().toString().length() > 1) {
                     final Message message = new Message();
+                    message.setTime(new Date().getTime());
                     message.setDate(new Date());
                     message.setUser(user.getDisplayName());
                     message.setDestinyId(destiny.getId());
@@ -107,7 +111,7 @@ public class Chat extends AppCompatActivity {
                             @Override
                             public void run() {
                                 try {
-                                    Sender.post(user.getDisplayName() + " ha escrito", message.getMessage(), destiny.getToken());
+                                    Sender.post(user.getDisplayName() + " ha escrito", message.getMessage(), destiny.getToken(), user.getUid());
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -119,7 +123,7 @@ public class Chat extends AppCompatActivity {
                             @Override
                             public void run() {
                                 try {
-                                    Sender.post(user.getDisplayName() + " ha escrito", message.getMessage());
+                                    Sender.post(user.getDisplayName() + " ha escrito", message.getMessage(), "0");
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -151,7 +155,7 @@ public class Chat extends AppCompatActivity {
             TextView tvDate = (TextView) convertView.findViewById(R.id.date);
             tvMessage.setText(message.getMessage());
             tvUserName.setText(message.getUser());
-            tvDate.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(message.getDate()));
+            tvDate.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(message.getDate()));
             return convertView;
         }
     }

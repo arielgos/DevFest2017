@@ -1,5 +1,7 @@
 package com.agos.df2017.fcm;
 
+import com.agos.df2017.entities.User;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -21,7 +23,7 @@ public class Sender {
         return connection;
     }
 
-    public static boolean post(String title, String message, String token) throws Exception {
+    public static boolean post(String title, String message, String token, String uid) throws Exception {
         URL url = new URL("https://fcm.googleapis.com/fcm/send");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         try {
@@ -30,9 +32,12 @@ public class Sender {
             JSONObject notification = new JSONObject();
             notification.put("body", message);
             notification.put("title", title);
+            notification.put("user", uid);
+            notification.put("sound", "default");
 
             JSONObject data = new JSONObject();
             data.put("message", message);
+            data.put("user", uid);
             root.put("notification", notification);
             root.put("data", data);
             root.put("registration_ids", new JSONArray().put(token));
@@ -58,7 +63,7 @@ public class Sender {
         }
     }
 
-    public static boolean post(String title, String message) throws Exception {
+    public static boolean post(String title, String message, String uid) throws Exception {
         URL url = new URL("https://fcm.googleapis.com/fcm/send");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         try {
@@ -67,11 +72,13 @@ public class Sender {
             JSONObject notification = new JSONObject();
             notification.put("body", message);
             notification.put("title", title);
+            notification.put("user", uid);
             notification.put("sound", "default");
 
 
             JSONObject data = new JSONObject();
             data.put("message", message);
+            data.put("user", uid);
             root.put("notification", notification);
             root.put("data", data);
             root.put("to", "/topics/chats");

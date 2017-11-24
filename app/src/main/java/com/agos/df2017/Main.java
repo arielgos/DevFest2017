@@ -69,6 +69,30 @@ public class Main extends AppCompatActivity implements GoogleApiClient.OnConnect
     private ListView list;
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        String uid = intent.getExtras().getString("user");
+        if (uid.equals("0")) {
+            User group = new User();
+            group.setId("0");
+            group.setName("GDG Santa Cruz");
+            group.setEmail("mail@gdgsantacruz.org");
+            group.setPhoto("https://lh6.googleusercontent.com/-fe6PusUqlWI/AAAAAAAAAAI/AAAAAAAAA4E/cMmA69H3GuU/photo.jpg");
+            openChat(group);
+        } else {
+            FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
+            DocumentReference reference = fireStore.collection("users").document(uid);
+            reference.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                @Override
+                public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                    User user = documentSnapshot.toObject(User.class);
+                    openChat(user);
+                }
+            });
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -92,15 +116,9 @@ public class Main extends AppCompatActivity implements GoogleApiClient.OnConnect
         });
 
         // Configure Google Sign In
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken(getString(R.string.default_web_client_id)).requestEmail().build();
 
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
+        googleApiClient = new GoogleApiClient.Builder(this).enableAutoManage(this, this).addApi(Auth.GOOGLE_SIGN_IN_API, gso).build();
 
         //Firebase Auth
         auth = FirebaseAuth.getInstance();
@@ -124,7 +142,7 @@ public class Main extends AppCompatActivity implements GoogleApiClient.OnConnect
         User group = new User();
         group.setId("0");
         group.setName("GDG Santa Cruz");
-        group.setEmail("GDG Santa Cruz");
+        group.setEmail("mail@gdgsantacruz.org");
         group.setPhoto("https://lh6.googleusercontent.com/-fe6PusUqlWI/AAAAAAAAAAI/AAAAAAAAA4E/cMmA69H3GuU/photo.jpg");
         users.add(group);
 
@@ -155,9 +173,7 @@ public class Main extends AppCompatActivity implements GoogleApiClient.OnConnect
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 User user = (User) list.getAdapter().getItem(i);
-                Intent intent = new Intent(Main.this, Chat.class);
-                intent.putExtra("user", user);
-                startActivity(intent);
+                openChat(user);
             }
         });
 
@@ -169,9 +185,11 @@ public class Main extends AppCompatActivity implements GoogleApiClient.OnConnect
             public void onEvent(QuerySnapshot snapshots, FirebaseFirestoreException e) {
                 if (snapshots != null) {
                     for (DocumentChange document : snapshots.getDocumentChanges()) {
-                        User user = document.getDocument().toObject(User.class);
-                        if (!(firebaseUser.getUid().equals(user.getId()))) {
-                            users.add(user);
+                        if (document.getType().equals(DocumentChange.Type.ADDED)) {
+                            User user = document.getDocument().toObject(User.class);
+                            if (!(firebaseUser.getUid().equals(user.getId()))) {
+                                users.add(user);
+                            }
                         }
                     }
                     ((UserAdapter) list.getAdapter()).notifyDataSetChanged();
@@ -189,14 +207,13 @@ public class Main extends AppCompatActivity implements GoogleApiClient.OnConnect
         // Firebase sign out
         auth.signOut();
         // Google sign out
-        Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(
-                new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(@NonNull Status status) {
-                        startActivity(new Intent(Main.this, Register.class));
-                        finish();
-                    }
-                });
+        Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallback<Status>() {
+            @Override
+            public void onResult(@NonNull Status status) {
+                startActivity(new Intent(Main.this, Register.class));
+                finish();
+            }
+        });
     }
 
     public class UserAdapter extends ArrayAdapter<User> {
@@ -251,5 +268,11 @@ public class Main extends AppCompatActivity implements GoogleApiClient.OnConnect
                 list.setAdapter(new UserAdapter(Main.this, (ArrayList<User>) results.values));
             }
         }
+    }
+
+    private void openChat(User user) {
+        Intent intent = new Intent(Main.this, Chat.class);
+        intent.putExtra("user", user);
+        startActivity(intent);
     }
 }

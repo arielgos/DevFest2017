@@ -16,6 +16,7 @@ public class Message implements Serializable {
     private String user;
     private Double latitude;
     private Double longitude;
+    private Long time;
 
     public String getId() {
         return id;
@@ -81,17 +82,16 @@ public class Message implements Serializable {
         this.user = user;
     }
 
+    public Long getTime() {
+        return time;
+    }
+
+    public void setTime(Long time) {
+        this.time = time;
+    }
+
     @Override
     public String toString() {
-        return "Message{" +
-                "id='" + id + '\'' +
-                ", date=" + date +
-                ", originId='" + originId + '\'' +
-                ", destinyId='" + destinyId + '\'' +
-                ", message='" + message + '\'' +
-                ", user='" + user + '\'' +
-                ", latitude=" + latitude +
-                ", longitude=" + longitude +
-                '}';
+        return "Message{" + "id='" + id + '\'' + ", date=" + date + ", originId='" + originId + '\'' + ", destinyId='" + destinyId + '\'' + ", message='" + message + '\'' + ", user='" + user + '\'' + ", latitude=" + latitude + ", longitude=" + longitude + ", time=" + time + '}';
     }
 }
